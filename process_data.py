@@ -70,7 +70,10 @@ def prepare_data(dataset):
     # Convert to pandas
     df = dataset.to_pandas()
     
-    # Select and rename columns
+    # Print available columns for debugging
+    print(f"   Available columns: {list(df.columns)}")
+    
+    # Select and rename columns (only keep those that exist)
     available_cols = [col for col in KEEP_COLUMNS if col in df.columns]
     df = df[available_cols].copy()
     
@@ -80,11 +83,13 @@ def prepare_data(dataset):
     # Reset index
     df = df.reset_index(drop=True)
     
-    # Add local_poster_path (for image display in Streamlit)
-    # This assumes posters are stored in data/posters/
-    df["local_poster_path"] = df["poster_path"].apply(
-        lambda x: f"data/posters/{Path(x).name}" if pd.notna(x) and x else None
-    )
+    # Add local_poster_path (for image display in Streamlit) if poster_path exists
+    if "poster_path" in df.columns:
+        df["local_poster_path"] = df["poster_path"].apply(
+            lambda x: f"data/posters/{Path(x).name}" if pd.notna(x) and x else None
+        )
+    else:
+        df["local_poster_path"] = None
     
     print(f"✅ Prepared {len(df)} movies with valid descriptions")
     return df
